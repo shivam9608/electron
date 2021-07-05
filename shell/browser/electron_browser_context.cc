@@ -95,6 +95,8 @@ std::string MakePartitionName(const std::string& input) {
 
 }  // namespace
 
+const char kHidGrantedDevicesPref[] =
+    "profile.content_settings.exceptions.hid_chooser_data";
 const char kSerialGrantedDevicesPref[] =
     "profile.content_settings.exceptions.serial-chooser-data";
 
@@ -194,6 +196,7 @@ void ElectronBrowserContext::InitPrefs() {
   registry->RegisterFilePathPref(prefs::kDownloadDefaultDirectory,
                                  download_dir);
   registry->RegisterDictionaryPref(prefs::kDevToolsFileSystemPaths);
+  registry->RegisterDictionaryPref(kHidGrantedDevicesPref);
   registry->RegisterDictionaryPref(kSerialGrantedDevicesPref);
   InspectableWebContents::RegisterPrefs(registry.get());
   MediaDeviceIDSalt::RegisterPrefs(registry.get());

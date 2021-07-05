@@ -168,6 +168,14 @@ bool WebContentsPermissionHelper::CheckSerialAccessPermission(
       static_cast<content::PermissionType>(PermissionType::SERIAL), &details);
 }
 
+bool WebContentsPermissionHelper::CheckHIDAccessPermission(
+    const url::Origin& embedding_origin) const {
+  base::DictionaryValue details;
+  details.SetString("securityOrigin", embedding_origin.GetURL().spec());
+  return CheckPermission(
+      static_cast<content::PermissionType>(PermissionType::HID), &details);
+}
+
 WEB_CONTENTS_USER_DATA_KEY_IMPL(WebContentsPermissionHelper)
 
 }  // namespace electron

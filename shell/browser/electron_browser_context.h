@@ -47,6 +47,7 @@ class WebViewManager;
 class ProtocolRegistry;
 
 // Preference keys for device apis
+extern const char kHidGrantedDevicesPref[];
 extern const char kSerialGrantedDevicesPref[];
 
 class ElectronBrowserContext : public content::BrowserContext {

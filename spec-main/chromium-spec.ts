@@ -1881,3 +1881,64 @@ describe('navigator.bluetooth', () => {
     expect(bluetooth).to.be.oneOf(['Found a device!', 'Bluetooth adapter not available.', 'User cancelled the requestDevice() chooser.']);
   });
 });
+
+describe('navigator.hid', () => {
+  let w: BrowserWindow;
+  before(async () => {
+    w = new BrowserWindow({
+      show: false
+    });
+    await w.loadFile(path.join(fixturesPath, 'pages', 'blank.html'));
+  });
+
+  const getDevices: any = () => {
+    return w.webContents.executeJavaScript(`
+      navigator.hid.requestDevice({filters: []}).then(device => device.toString()).catch(err => err.toString());
+    `, true);
+  };
+
+  after(closeAllWindows);
+  afterEach(() => {
+    session.defaultSession.setPermissionCheckHandler(null);
+    session.defaultSession.removeAllListeners('select-hid-device');
+  });
+
+  it('does not return a device if select-hid-device event is not defined', async () => {
+    w.loadFile(path.join(fixturesPath, 'pages', 'blank.html'));
+    const device = await getDevices();
+    expect(device).to.equal('');
+  });
+
+  it('does not return a device when permission denied', async () => {
+    let selectFired = false;
+    w.webContents.session.on('select-hid-device', (event, details, callback) => {
+      selectFired = true;
+      callback('');
+    });
+    session.defaultSession.setPermissionCheckHandler(() => false);
+    const device = await getDevices();
+    expect(selectFired).to.be.false();
+    expect(device).to.equal('');
+  });
+
+  it('returns a device when select-hid-device event is defined', async () => {
+    let haveDevices = false;
+    let selectFired = false;
+    w.webContents.session.on('select-hid-device', (event, details, callback) => {
+      selectFired = true;
+      if (details.deviceList.length > 0) {
+        haveDevices = true;
+        callback(details.deviceList[0].deviceId);
+      } else {
+        callback('');
+      }
+    });
+    const device = await getDevices();
+    expect(selectFired).to.be.true();
+    if (haveDevices) {
+      expect(device).to.contain('[object HIDDevice]');
+    } else {
+      expect(device).to.equal('');
+    }
+  });
+});
